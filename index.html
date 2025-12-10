@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="gu">
 <head>
@@ -98,3 +99,105 @@
 
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gola Galaxy - Order Now</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <img src="image/logo.png" class="logo">
+        <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+    </header>
+
+    <!-- SEARCH -->
+    <div class="search-box">
+        <span>🔍</span>
+        <input id="searchInput" placeholder="Search gola...">
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="active" data-tab="all">All</button>
+        <button data-tab="dish">Dish Gola</button>
+        <button data-tab="stick">Stick Gola</button>
+    </div>
+
+    <!-- GRID -->
+    <div class="grid"></div>
+
+    <!-- PREVIEW OVERLAY -->
+    <div class="preview-overlay" onclick="closePreview()"></div>
+
+    <!-- PREVIEW BOX -->
+    <div class="preview-box">
+        <div class="preview-img">
+            <img id="previewImg">
+        </div>
+
+        <h2 id="previewName"></h2>
+        <h3 id="previewPrice"></h3>
+
+        <div class="qty-title">Quantity</div>
+
+<div class="qty-box">
+    <button onclick="previewQty--; updatePreviewQty()">−</button>
+    <span id="previewQty">1</span>
+    <button onclick="previewQty++; updatePreviewQty()">+</button>
+</div>
+
+
+        <button class="btn" onclick="confirmAddToCart()">Add to Cart</button>
+        <button class="close-btn" onclick="closePreview()">Close</button>
+    </div>
+
+    <!-- CART BAR (FLOATING) -->
+    <div class="cart-bar" onclick="openCart()">
+        <span id="cartText">🛒 View Cart</span>
+    </div>
+
+    <!-- CART OVERLAY -->
+    <div class="cart-overlay" onclick="closeCart()"></div>
+
+    <div class="cart-sheet" id="cartSheet">
+    <div class="cart-header">
+        <h2>Your Cart</h2>
+        <input id="customerName" class="input-name" placeholder="Customer Name">
+
+        <!-- <button class="close-cart" id="closeCartBtn">✖</button> -->
+    </div>
+
+    <div id="cartItems" class="cart-items"></div>
+
+    <textarea id="notes" placeholder="Special notes..."></textarea>
+
+    <h2 class="cart-total">🧾 Final Total: <span id="totalAmount">₹0</span></h2>
+
+    
+    <div class="slide-container">
+    <div class="slide-track" id="sliderTrack">
+
+    <div class="slide-progress" id="slideProgress"></div>
+
+    <div class="slide-thumb" id="slideThumb">➜</div>
+
+    <span class="slide-text" id="slideText">Slide to Order</span>
+
+</div>
+
+</div>
+
+    <!-- JAVASCRIPT -->
+    <script src="app.js"></script>
+
+</body>
+</html>
+>>>>>>> 2b3334ced7923867b164709c69667c1fca4e9b08
