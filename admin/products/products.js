@@ -1,111 +1,94 @@
 import { db } from "../firebase.js";
-
 import {
   collection,
   addDoc,
   getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 🔗 Cloudinary config
-const CLOUD_NAME = "dydtmlbsm";
-const UPLOAD_PRESET = "gola_products_free";
+console.log("products.js loaded");
 
-// 🔘 Elements
 const addBtn = document.getElementById("addBtn");
-const productList = document.getElementById("productList");
 const statusMsg = document.getElementById("statusMsg");
 
-// ➕ Add Product
+const nameInput = document.getElementById("golaName");
+const priceInput = document.getElementById("golaPrice");
+const fileInput = document.getElementById("golaImage");
+
+const productsRef = collection(db, "products");
+
+// ---------------- ADD PRODUCT ----------------
 addBtn.addEventListener("click", async () => {
-  const name = document.getElementById("name").value.trim();
-  const price = document.getElementById("price").value.trim();
-  const imageFile = document.getElementById("image").files[0];
+  statusMsg.textContent = "Uploading...";
+  statusMsg.style.color = "black";
 
-  // Reset UI
-  statusMsg.style.color = "green";
-  statusMsg.textContent = "";
+  const name = nameInput.value.trim();
+  const price = priceInput.value.trim();
+  const file = fileInput.files[0];
 
-  if (!name || !price || !imageFile) {
+  if (!name || !price || !file) {
+    statusMsg.textContent = "❌ All fields required";
     statusMsg.style.color = "red";
-    statusMsg.textContent = "❌ Please fill all fields";
     return;
   }
 
   try {
-    // Disable button
-    addBtn.disabled = true;
-    addBtn.textContent = "Uploading...";
-
-    // 🟡 Uploading image
-    statusMsg.textContent = "Uploading image to Cloudinary...";
-
+    // 1️⃣ Upload to Cloudinary
     const formData = new FormData();
-    formData.append("file", imageFile);
-    formData.append("upload_preset", "gola_upload");
+    formData.append("file", file);
+    formData.append("upload_preset", "gola_upload"); // MUST MATCH
     formData.append("folder", "golas");
 
-    const response = await fetch(
-      `https://api.cloudinary.com/v1_1/dydtmlbsm/auto/upload`,
+    const uploadRes = await fetch(
+      "https://api.cloudinary.com/v1_1/dydtmlbsm/image/upload",
       {
         method: "POST",
         body: formData
       }
     );
 
-    const data = await response.json();
+    if (!uploadRes.ok) throw new Error("Cloudinary upload failed");
 
-    if (!data.secure_url) {
-      throw new Error("Cloudinary upload failed");
-    }
+    const uploadData = await uploadRes.json();
 
-    // 🟢 Saving product
-    statusMsg.textContent = "Saving product...";
-
-    await addDoc(collection(db, "products"), {
-      name: name,
-      price: price,
-      image: data.secure_url,
+    // 2️⃣ Save to Firestore
+    await addDoc(productsRef, {
+      name,
+      price: Number(price),
+      image: uploadData.secure_url,
       createdAt: new Date()
     });
 
-    // ✅ Success
-    statusMsg.textContent = "✅ Gola added successfully!";
-    addBtn.disabled = false;
-    addBtn.textContent = "Add Gola";
+    statusMsg.textContent = "✅ Product added successfully!";
+    statusMsg.style.color = "green";
 
-    // Reload to show new product
-    setTimeout(() => {
-      location.reload();
-    }, 1000);
+    nameInput.value = "";
+    priceInput.value = "";
+    fileInput.value = "";
 
+    loadProducts();
   } catch (err) {
     console.error(err);
-    statusMsg.style.color = "red";
     statusMsg.textContent = "❌ Upload failed. Try again.";
-    addBtn.disabled = false;
-    addBtn.textContent = "Add Gola";
+    statusMsg.style.color = "red";
   }
 });
 
-// 📦 Load Products
+// ---------------- LOAD PRODUCTS ----------------
 async function loadProducts() {
-  const querySnapshot = await getDocs(collection(db, "products"));
-  productList.innerHTML = "";
+  const list = document.getElementById("productsList");
+  list.innerHTML = "";
 
-  querySnapshot.forEach((doc) => {
+  const snapshot = await getDocs(productsRef);
+  snapshot.forEach(doc => {
     const p = doc.data();
-
-    productList.innerHTML += `
-      <div style="border:1px solid #ccc; padding:10px; margin:10px 0; display:flex; gap:10px; align-items:center">
-        <img src="${p.image}" width="80" height="80" style="object-fit:cover;border-radius:6px"/>
-        <div>
-          <p><strong>${p.name}</strong></p>
-          <p>₹${p.price}</p>
-        </div>
+    list.innerHTML += `
+      <div class="product">
+        <img src="${p.image}" width="80">
+        <h4>${p.name}</h4>
+        <p>₹${p.price}</p>
       </div>
     `;
   });
 }
 
-// Load on page open
 loadProducts();
