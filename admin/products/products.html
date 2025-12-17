@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Manage Products | Gola Galaxy</title>
+</head>
+<body>
+
+  <h1>🍧 Manage Golas</h1>
+
+  <h3>Add New Gola</h3>
+
+  <input type="text" id="name" placeholder="Gola name" />
+  <br><br>
+
+  <input type="number" id="price" placeholder="Price ₹" />
+  <br><br>
+
+  <input type="file" id="image" accept="image/*" />
+  <br><br>
+
+  <button id="addBtn">Add Gola</button>
+
+  <hr>
+
+  <h3>All Products</h3>
+  <div id="productList"></div>
+
+  <!-- IMPORTANT: module script -->
+  <script type="module" src="./products.js"></script>
+</body>
+
+<script type="module">
+  import { auth } from "../firebase.js";
+  import { onAuthStateChanged } from
+    "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "../login.html";
+    }
+  });
+</script>
+
+</html>
