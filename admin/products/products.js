@@ -32,7 +32,7 @@ addBtn.addEventListener("click", async () => {
     formData.append("upload_preset", UPLOAD_PRESET);
 
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+      `https://api.cloudinary.com/v1_1/dydtmlbsm/image/upload`,
       {
         method: "POST",
         body: formData
