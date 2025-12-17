@@ -1,4 +1,4 @@
-import { db, storage } from "../firebase.js";
+import { db } from "../firebase.js";
 
 import {
   collection,
@@ -6,14 +6,11 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
 const addBtn = document.getElementById("addBtn");
 const productList = document.getElementById("productList");
+
+const CLOUD_NAME = "dydtmlbsm";
+const UPLOAD_PRESET = "gola_products";
 
 addBtn.addEventListener("click", async () => {
   const name = document.getElementById("name").value;
@@ -26,16 +23,30 @@ addBtn.addEventListener("click", async () => {
   }
 
   try {
-    // 1️⃣ Upload image to Firebase Storage
-    const imageRef = ref(storage, `products/${Date.now()}-${imageFile.name}`);
-    await uploadBytes(imageRef, imageFile);
-    const imageURL = await getDownloadURL(imageRef);
+    // 🔼 1. Upload image to Cloudinary
+    const formData = new FormData();
+    formData.append("file", imageFile);
+    formData.append("upload_preset", UPLOAD_PRESET);
 
-    // 2️⃣ Save product data to Firestore
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+
+    const data = await response.json();
+
+    if (!data.secure_url) {
+      throw new Error("Image upload failed");
+    }
+
+    // 🧾 2. Save product data to Firestore
     await addDoc(collection(db, "products"), {
       name: name,
       price: price,
-      image: imageURL,
+      image: data.secure_url,
       createdAt: new Date()
     });
 
@@ -54,13 +65,13 @@ async function loadProducts() {
   productList.innerHTML = "";
 
   querySnapshot.forEach((doc) => {
-    const data = doc.data();
+    const p = doc.data();
 
     productList.innerHTML += `
       <div style="border:1px solid #ccc; padding:10px; margin:10px 0">
-        <img src="${data.image}" width="80" />
-        <p><strong>${data.name}</strong></p>
-        <p>₹${data.price}</p>
+        <img src="${p.image}" width="80" />
+        <p><strong>${p.name}</strong></p>
+        <p>₹${p.price}</p>
       </div>
     `;
   });
