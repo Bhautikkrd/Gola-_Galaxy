@@ -1,7 +1,4 @@
-alert("products.js loaded");
-
 import { db } from "../firebase.js";
-
 
 import {
   collection,
@@ -9,30 +6,45 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+// 🔗 Cloudinary config
+const CLOUD_NAME = "dydtmlbsm";
+const UPLOAD_PRESET = "gola_products_free";
+
+// 🔘 Elements
 const addBtn = document.getElementById("addBtn");
 const productList = document.getElementById("productList");
+const statusMsg = document.getElementById("statusMsg");
 
-const CLOUD_NAME = "dydtmlbsm";
-const UPLOAD_PRESET = "gola_products";
-
+// ➕ Add Product
 addBtn.addEventListener("click", async () => {
-  const name = document.getElementById("name").value;
-  const price = document.getElementById("price").value;
+  const name = document.getElementById("name").value.trim();
+  const price = document.getElementById("price").value.trim();
   const imageFile = document.getElementById("image").files[0];
 
+  // Reset UI
+  statusMsg.style.color = "green";
+  statusMsg.textContent = "";
+
   if (!name || !price || !imageFile) {
-    alert("Please fill all fields");
+    statusMsg.style.color = "red";
+    statusMsg.textContent = "❌ Please fill all fields";
     return;
   }
 
   try {
-    // 🔼 1. Upload image to Cloudinary
+    // Disable button
+    addBtn.disabled = true;
+    addBtn.textContent = "Uploading...";
+
+    // 🟡 Uploading image
+    statusMsg.textContent = "Uploading image to Cloudinary...";
+
     const formData = new FormData();
     formData.append("file", imageFile);
     formData.append("upload_preset", UPLOAD_PRESET);
 
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/dydtmlbsm/image/upload`,
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
       {
         method: "POST",
         body: formData
@@ -42,10 +54,12 @@ addBtn.addEventListener("click", async () => {
     const data = await response.json();
 
     if (!data.secure_url) {
-      throw new Error("Image upload failed");
+      throw new Error("Cloudinary upload failed");
     }
 
-    // 🧾 2. Save product data to Firestore
+    // 🟢 Saving product
+    statusMsg.textContent = "Saving product...";
+
     await addDoc(collection(db, "products"), {
       name: name,
       price: price,
@@ -53,16 +67,26 @@ addBtn.addEventListener("click", async () => {
       createdAt: new Date()
     });
 
-    alert("Gola added successfully 🧊");
-    location.reload();
+    // ✅ Success
+    statusMsg.textContent = "✅ Gola added successfully!";
+    addBtn.disabled = false;
+    addBtn.textContent = "Add Gola";
+
+    // Reload to show new product
+    setTimeout(() => {
+      location.reload();
+    }, 1000);
 
   } catch (err) {
     console.error(err);
-    alert("Error adding product");
+    statusMsg.style.color = "red";
+    statusMsg.textContent = "❌ Upload failed. Try again.";
+    addBtn.disabled = false;
+    addBtn.textContent = "Add Gola";
   }
 });
 
-// 🔽 Load products
+// 📦 Load Products
 async function loadProducts() {
   const querySnapshot = await getDocs(collection(db, "products"));
   productList.innerHTML = "";
@@ -71,13 +95,16 @@ async function loadProducts() {
     const p = doc.data();
 
     productList.innerHTML += `
-      <div style="border:1px solid #ccc; padding:10px; margin:10px 0">
-        <img src="${p.image}" width="80" />
-        <p><strong>${p.name}</strong></p>
-        <p>₹${p.price}</p>
+      <div style="border:1px solid #ccc; padding:10px; margin:10px 0; display:flex; gap:10px; align-items:center">
+        <img src="${p.image}" width="80" height="80" style="object-fit:cover;border-radius:6px"/>
+        <div>
+          <p><strong>${p.name}</strong></p>
+          <p>₹${p.price}</p>
+        </div>
       </div>
     `;
   });
 }
 
+// Load on page open
 loadProducts();
