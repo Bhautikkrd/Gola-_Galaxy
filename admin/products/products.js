@@ -41,7 +41,8 @@ addBtn.addEventListener("click", async () => {
 
     const formData = new FormData();
     formData.append("file", imageFile);
-    formData.append("upload_preset", UPLOAD_PRESET);
+    formData.append("upload_preset", "gola_upload");
+    formData.append("folder", "golas");
 
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/dydtmlbsm/auto/upload`,
