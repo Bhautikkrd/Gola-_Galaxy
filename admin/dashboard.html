@@ -2,13 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Admin Dashboard</title>
+  <title>Gola Galaxy Admin</title>
 </head>
 <body>
-  <h1>Welcome to Gola Galaxy Admin Dashboard 🌌</h1>
 
-  <p>Login successful!</p>
+  <h1>Welcome to Gola Galaxy Admin 🌌</h1>
+  <p>You are logged in.</p>
 
-  <a href="login.html">Logout</a>
+  <button id="logoutBtn">Logout</button>
+
+  <script type="module">
+    import { auth } from "./firebase.js";
+    import { onAuthStateChanged, signOut } from
+      "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // Protect page
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      }
+    });
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      signOut(auth).then(() => {
+        window.location.href = "login.html";
+      });
+    });
+  </script>
+
 </body>
 </html>
